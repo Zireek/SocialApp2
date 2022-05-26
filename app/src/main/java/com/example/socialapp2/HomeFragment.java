@@ -1,6 +1,13 @@
 package com.example.socialapp2;
 
 import android.os.Bundle;
+import android.text.format.DateFormat;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,21 +17,10 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.text.format.DateFormat;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-
 import com.bumptech.glide.Glide;
-import com.example.socialapp2.AppViewModel;
-import com.example.socialapp2.R;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -60,7 +56,7 @@ public class HomeFragment extends Fragment {
 
         RecyclerView postsRecyclerView = view.findViewById(R.id.postsRecyclerView);
 
-        Query query = FirebaseFirestore.getInstance().collection("posts").orderBy("time", Query.Direction.DESCENDING).limit(50);
+        Query query = FirebaseFirestore.getInstance().collection("posts").orderBy("date", Query.Direction.DESCENDING).limit(50);
 
         FirestoreRecyclerOptions<Post> options = new FirestoreRecyclerOptions.Builder<Post>()
                 .setQuery(query, Post.class)
@@ -68,7 +64,6 @@ public class HomeFragment extends Fragment {
                 .build();
 
         postsRecyclerView.setAdapter(new PostsAdapter(options));
-
 
         appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
@@ -88,13 +83,24 @@ public class HomeFragment extends Fragment {
             Glide.with(getContext()).load(post.authorPhotoUrl).circleCrop().into(holder.authorPhotoImageView);
             holder.authorTextView.setText(post.author);
             holder.contentTextView.setText(post.content);
-            holder.dataTextView.setText(DateFormat.format("dd/MM/yy HH:mm", new Date(post.time)).toString());
+            holder.dateTextView.setText(DateFormat.format("dd/MM/yy HH:mm", new Date(post.date)).toString());
 
             if (!user.equals(post.uid)){
                 holder.borrar.setVisibility(View.GONE);
             }else{
                 holder.borrar.setVisibility(View.VISIBLE);
             }
+
+            if (post.authorPhotoUrl != null){
+                Glide.with(getContext()).load(post.authorPhotoUrl).circleCrop().into(holder.authorPhotoImageView);
+                holder.authorTextView.setText(post.author);
+                holder.contentTextView.setText(post.content);
+            } else{
+                Glide.with(getContext()).load(R.drawable.userunknown).circleCrop().into(holder.authorPhotoImageView);
+                holder.authorTextView.setText("Usuario desconocido");
+                holder.contentTextView.setText(post.content);
+            }
+            holder.dateTextView.setText(DateFormat.format("dd/MM/yy HH:mm", new Date(post.date)).toString());
 
             // Gestion de likes
             final String postKey = getSnapshots().getSnapshot(position).getId();
@@ -125,31 +131,28 @@ public class HomeFragment extends Fragment {
             } else {
                 holder.mediaImageView.setVisibility(View.GONE);
             }
-
             holder.borrar.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     FirebaseFirestore.getInstance().collection("posts").document(post.id).delete();
                 }
             });
-
-
         }
 
         class PostViewHolder extends RecyclerView.ViewHolder {
-            ImageView authorPhotoImageView, likeImageView, mediaImageView;
-            ImageButton borrar;
-            TextView authorTextView, contentTextView, numLikesTextView, dataTextView;
+            ImageView authorPhotoImageView, likeImageView, mediaImageView, borrar;
+            TextView authorTextView, contentTextView, numLikesTextView, dateTextView;
+
             PostViewHolder(@NonNull View itemView) {
                 super(itemView);
                 authorPhotoImageView = itemView.findViewById(R.id.photoImageView);
                 likeImageView = itemView.findViewById(R.id.likeImageView);
-                mediaImageView = itemView.findViewById(R.id.camara_fotos);
+                mediaImageView = itemView.findViewById(R.id.mediaImage);
                 authorTextView = itemView.findViewById(R.id.authorTextView);
                 contentTextView = itemView.findViewById(R.id.contentTextView);
                 numLikesTextView = itemView.findViewById(R.id.numLikesTextView);
-                dataTextView = itemView.findViewById(R.id.emailTextView);
-                borrar = itemView.findViewById(R.id.action_settings);
+                dateTextView = itemView.findViewById(R.id.dateTextView);
+                borrar = itemView.findViewById(R.id.buttonBorrar);
             }
         }
     }

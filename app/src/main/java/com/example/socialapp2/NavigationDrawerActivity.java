@@ -33,6 +33,16 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //Esto de aqui es para esconder la barra de notificaciones
+        View decorView = getWindow().getDecorView();
+         /*Hide both the navigation bar and the status bar.
+         SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
+         a general rule, you should design your app to hide the status bar whenever you
+         hide the navigation bar.*/
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+
         binding = ActivityNavigationDrawerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -48,7 +58,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         NavigationView navigationView = binding.navView;
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder()
+        mAppBarConfiguration = new AppBarConfiguration.Builder(R.id.homeFragment, R.id.profileFragment, R.id.signOutFragment)
                 .setOpenableLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_navigation_drawer);
@@ -56,7 +66,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navigationView, navController);
 
         View header = navigationView.getHeaderView(0);
-        final ImageView photo = header.findViewById(R.id.photoImageView);
+        final ImageView photo = header.findViewById(R.id.authorPhotoImageView);
         final TextView name = header.findViewById(R.id.displayNameTextView);
         final TextView email = header.findViewById(R.id.emailTextView);
 
@@ -66,16 +76,20 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
 
                 if(user != null){
-                    Glide.with(NavigationDrawerActivity.this)
-                            .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString())
-                            .circleCrop()
-                            .into(photo);
+                    if(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl() != null) {
+                        Glide.with(NavigationDrawerActivity.this)
+                                .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString())
+                                .circleCrop()
+                                .into(photo);
+                    }
+                    else{
+                        photo.setImageResource(R.drawable.usuariodesconocido);
+                    }
                     name.setText(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
                     email.setText(FirebaseAuth.getInstance().getCurrentUser().getEmail());
                 }
             }
         });
-
         FirebaseFirestore.getInstance().setFirestoreSettings(new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(false)
                 .build());
@@ -84,7 +98,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.navigation_drawer, menu);
+        getMenuInflater().inflate(R.menu.activity_navigation_drawer_drawer, menu);
         return true;
     }
 

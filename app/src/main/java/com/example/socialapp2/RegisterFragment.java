@@ -1,19 +1,18 @@
 package com.example.socialapp2;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -24,11 +23,12 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class RegisterFragment extends Fragment {
 
-    NavController navController;   // <-----------------
+    NavController navController;
     private EditText emailEditText, passwordEditText;
     private Button registerButton;
     private FirebaseAuth mAuth;
 
+    public RegisterFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -39,12 +39,14 @@ public class RegisterFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        navController = Navigation.findNavController(view);  // <-----------------
+        navController = Navigation.findNavController(view);
 
         emailEditText = view.findViewById(R.id.emailEditText);
         passwordEditText = view.findViewById(R.id.passwordEditText);
-        registerButton = view.findViewById(R.id.registerButton);
+
         mAuth = FirebaseAuth.getInstance();
+
+        registerButton = view.findViewById(R.id.registerButton);
 
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,8 +54,8 @@ public class RegisterFragment extends Fragment {
                 crearCuenta();
             }
         });
-
     }
+
     private void crearCuenta() {
         if (!validarFormulario()) {
             return;
@@ -68,13 +70,11 @@ public class RegisterFragment extends Fragment {
                         if (task.isSuccessful()) {
                             actualizarUI(mAuth.getCurrentUser());
                         } else {
-                            Snackbar.make(requireView(), "Error: " + task.getException(), Snackbar.LENGTH_LONG).show();
-
+                            Snackbar.make(requireView(), "Error: El usuario o la constraseña son incorrectas", Snackbar.LENGTH_LONG).show();
                         }
                         registerButton.setEnabled(true);
                     }
                 });
-
     }
 
     private void actualizarUI(FirebaseUser currentUser) {
@@ -99,7 +99,6 @@ public class RegisterFragment extends Fragment {
         } else {
             passwordEditText.setError(null);
         }
-
         return valid;
     }
 }

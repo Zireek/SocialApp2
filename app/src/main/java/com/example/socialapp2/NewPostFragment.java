@@ -105,7 +105,7 @@ public class NewPostFragment extends Fragment {
 
         Post post = new Post(user.getUid(), user.getDisplayName(),
                 (user.getPhotoUrl() != null ? user.getPhotoUrl().toString() :
-                        "R.drawable.user"), postContent, mediaUrl, mediaTipo, date);
+                        null), postContent, mediaUrl, mediaTipo, date);
         FirebaseFirestore.getInstance().collection("posts")
                 .add(post)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -114,16 +114,11 @@ public class NewPostFragment extends Fragment {
                         navController.popBackStack();
                         appViewModel.setMediaSeleccionado( null, null);
 
-
                         String chatId = documentReference.getId();
-
                         Log.v("CHATS", chatId);
-
                         documentReference.update("id", chatId);
-
                     }
                 });
-
     }
     private void pujaIguardarEnFirestore(final String postText) {
         FirebaseStorage.getInstance().getReference(mediaTipo + "/" +
